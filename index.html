@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quotation</title>
+  <style>
+    :root {
+      --dark: #1c1917;
+      --muted: #78716c;
+      --light-bg: #fafaf9;
+      --border-color: #d6d3d1;
+    }
+    * {
+      box-sizing: border-box;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+    body {
+      margin: 0;
+      padding: 16px;
+      background: #f5f5f4;
+      color: var(--dark);
+    }
+
+    .editor-container {
+      max-width: 900px;
+      margin: 0 auto;
+      background: #fff;
+      padding: 24px;
+      border-radius: 8px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+    }
+
+    h2, h3 {
+      margin-top: 0;
+      color: var(--dark);
+      font-weight: 600;
+    }
+
+    .cache-bar {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .btn-secondary {
+      background: #57534e;
+      color: #fff;
+      padding: 8px 14px;
+      font-size: 13px;
+      border-radius: 4px;
+      border: none;
+      cursor: pointer;
+    }
+    .btn-warning {
+      background: #dc2626;
+      color: #fff;
+      padding: 8px 14px;
+      font-size: 13px;
+      border-radius: 4px;
+      border: none;
+      cursor: pointer;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+
+    label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--muted);
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    input, textarea, select {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      font-size: 14px;
+      color: var(--dark);
+      background: #fff;
+    }
+
+    .logo-settings-box {
+      background: var(--light-bg);
+      border: 1px dashed #d6d3d1;
+      padding: 14px;
+      border-radius: 6px;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .logo-preview-box img {
+      max-height: 50px;
+      max-width: 160px;
+      object-fit: contain;
+      border: 1px solid var(--border-color);
+      background: #fff;
+      padding: 4px;
+      border-radius: 4px;
+    }
+
+    .item-card {
+      background: var(--light-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 16px;
+      margin-bottom: 14px;
+      position: relative;
+    }
+
+    .item-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .btn {
+      cursor: pointer;
+      padding: 10px 18px;
+      border-radius: 4px;
+      border: none;
+      font-weight: 600;
+      font-size: 14px;
+    }
+    .btn-add {
+      background: #15803d;
+      color: #fff;
+      width: 100%;
+      margin-bottom: 20px;
+    }
+    .btn-print {
+      background: var(--dark);
+      color: #fff;
+      width: 100%;
+      font-size: 15px;
+      letter-spacing: 0.5px;
+      padding: 14px;
+    }
+    .btn-remove {
+      background: #ef4444;
+      color: #fff;
+      padding: 4px 10px;
+      font-size: 12px;
+      float: right;
+      border-radius: 4px;
+    }
+
+    #quotation-sheet {
+      display: none;
+      background: #fff;
+    }
+
+    /* Print Template Layout */
+    @page {
+      size: A4 portrait;
+      margin: 0;
+    }
+
+    @media print {
+      html, body {
+        width: 100%;
+        margin: 0 !important;
+        padding: 0 !important;
+        background: #fff !important;
+      }
+      .editor-container {
+        display: none !important;
+      }
+      #quotation-sheet {
+        display: block !important;
+        width: 100%;
+        padding: 14mm 16mm;
+        color: var(--dark);
+      }
+    }
+
+    /* Top Row */
+    .brand-top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding-bottom: 16px;
+      border-bottom: 2px solid var(--dark);
+    }
+
+    .brand-logo-group {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      max-width: 70%;
+    }
+
+    .brand-logo-group img {
+      max-height: 60px;
+      max-width: 160px;
+      object-fit: contain;
+      display: block;
+      margin-top: 2px;
+    }
+
+    .brand-text-block .brand-title {
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      line-height: 1.1;
+      color: var(--dark);
+    }
+
+    .brand-text-block .company-subtitle {
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 2px;
+      font-weight: 500;
+    }
+
+    .brand-text-block .company-address-sub {
+      font-size: 10.5px;
+      line-height: 1.4;
+      color: #78716c;
+      margin-top: 4px;
+      max-width: 440px;
+    }
+
+    .header-doc-title {
+      font-family: "Georgia", "Times New Roman", serif;
+      font-size: 26px;
+      font-weight: 400;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      line-height: 1;
+      color: var(--dark);
+      margin-top: 4px;
+    }
+
+    /* Second Row */
+    .details-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding-top: 14px;
+      margin-bottom: 18px;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .client-block {
+      max-width: 60%;
+    }
+
+    .client-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--dark);
+      margin-bottom: 2px;
+    }
+
+    .meta-two-lines {
+      text-align: right;
+      font-size: 12.5px;
+      line-height: 1.6;
+    }
+
+    /* Product Table with Vertical & Horizontal Borders */
+    table.quote-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+      table-layout: auto;
+      border-left: 1px solid var(--border-color);
+      border-right: 1px solid var(--border-color);
+    }
+    table.quote-table thead tr {
+      border-top: 1.5px solid var(--dark);
+      border-bottom: 1.5px solid var(--dark);
+      background: #fafaf9;
+    }
+    table.quote-table th {
+      color: var(--dark);
+      padding: 9px 6px;
+      font-size: 10.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-right: 1px solid var(--border-color);
+    }
+    table.quote-table th:last-child {
+      border-right: none;
+    }
+    table.quote-table td {
+      border-bottom: 1px solid var(--border-color);
+      border-right: 1px solid var(--border-color);
+      padding: 10px 6px;
+      font-size: 12px;
+      vertical-align: top;
+      color: #292524;
+    }
+    table.quote-table td:last-child {
+      border-right: none;
+    }
+
+    .col-center { text-align: center; }
+    .col-right { 
+      text-align: right; 
+      white-space: nowrap;
+    }
+    
+    .item-img-preview {
+      max-width: 80px;
+      max-height: 80px;
+      object-fit: cover;
+      display: block;
+      margin: 0 auto 6px;
+      border-radius: 2px;
+      background: #f5f5f4;
+    }
+
+    tfoot tr td {
+      border-top: 1.5px solid var(--dark) !important;
+      border-bottom: 1.5px solid var(--dark) !important;
+      padding: 12px 6px !important;
+      background: #fafaf9;
+    }
+
+    .terms-bank-grid {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 30px;
+      margin-top: 24px;
+      font-size: 11px;
+      line-height: 1.5;
+      color: #57534e;
+    }
+    .section-tag {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--dark);
+      margin-bottom: 6px;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 4px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- INPUT FORM -->
+  <div class="editor-container">
+    <h2>Quotation Generator</h2>
+
+    <!-- Draft Management Toolbar -->
+    <div class="cache-bar">
+      <button type="button" class="btn-secondary" onclick="saveAsPreset()">Save as Preset</button>
+      <button type="button" class="btn-secondary" onclick="loadPreset()">Load Preset</button>
+      <button type="button" class="btn-warning" onclick="clearAllData()">Clear Form</button>
+      <span id="saveStatus" style="font-size: 12px; color: var(--muted); align-self: center;">Auto-saving active...</span>
+    </div>
+
+    <!-- Fixed Logo Setting -->
+    <div class="logo-settings-box">
+      <div class="logo-preview-box">
+        <img id="logoPreview" alt="Logo Preview" style="display: none;" />
+      </div>
+      <div style="flex-grow: 1;">
+        <label>Fixed Company Logo</label>
+        <input type="file" id="logoUpload" accept="image/*" onchange="savePermanentLogo(event)" />
+      </div>
+    </div>
+
+    <h3>1. Company & Header Details</h3>
+    <div class="form-grid">
+      <div>
+        <label>Brand Name</label>
+        <input type="text" id="brandName" value="Woodmont" oninput="autoSaveDraft()" />
+      </div>
+      <div>
+        <label>Company / Tagline</label>
+        <input type="text" id="companyName" value="by Mahavir Furniture" oninput="autoSaveDraft()" />
+      </div>
+      <div>
+        <label>Company Address (Under Tagline)</label>
+        <textarea id="companyAddress" rows="2" oninput="autoSaveDraft()">FF-102, Sarthik-2, Nr. Kiran Motors, Opp. Rajpath Club, S.G. Highway, Ahmedabad</textarea>
+      </div>
+      <div>
+        <label>Prepared By / Representative</label>
+        <input type="text" id="salesPerson" value="Bhagyesh Shah" oninput="autoSaveDraft()" />
+      </div>
+      <div>
+        <label>Date</label>
+        <input type="date" id="quoteDate" oninput="autoSaveDraft()" />
+      </div>
+    </div>
+
+    <h3>2. Client Information</h3>
+    <div class="form-grid">
+      <div>
+        <label>Client Name</label>
+        <input type="text" id="clientName" placeholder="e.g. VELTIS 1101 (DARSHAN BHAI)" oninput="autoSaveDraft()" />
+      </div>
+      <div>
+        <label>Client Address / Site (Displays under name)</label>
+        <input type="text" id="clientAddress" placeholder="Address..." oninput="autoSaveDraft()" />
+      </div>
+      <div>
+        <label>Contact Number (Displays under address)</label>
+        <input type="text" id="clientMobile" placeholder="e.g. +91 98765 43210" oninput="autoSaveDraft()" />
+      </div>
+    </div>
+
+    <h3>3. Line Items</h3>
+    <div id="itemsContainer"></div>
+    <button type="button" class="btn btn-add" onclick="addItem()">+ Add Item</button>
+
+    <h3>4. Terms & Bank Info</h3>
+    <div class="form-grid">
+      <div>
+        <label>Terms & Conditions</label>
+        <textarea id="termsInput" rows="5" oninput="autoSaveDraft()">1] GST @ 18% Extra.
+2] Payment: 75% Advance, 25% Against Delivery.
+3] Prices excluding transportation.
+4] Quote Validity: 10 Days.
+5] Delivery Period 30 to 35 Days After receipt of confirmation.</textarea>
+      </div>
+      <div>
+        <label>Bank Account Details</label>
+        <textarea id="bankInput" rows="5" oninput="autoSaveDraft()">Name: Sharma Trading Co.
+Bank: HDFC Bank
+A/C: 50200000026000
+IFSC: HDFC000000</textarea>
+      </div>
+    </div>
+
+    <button type="button" class="btn btn-print" onclick="generateAndPrint()">Generate & Download PDF</button>
+  </div>
+
+  <!-- PRINT SHEET -->
+  <div id="quotation-sheet">
+    <div class="brand-top-bar">
+      <div class="brand-logo-group">
+        <img id="printLogo" alt="Logo" style="display: none;" />
+        <div class="brand-text-block">
+          <div class="brand-title" id="p-brand"></div>
+          <div class="company-subtitle" id="p-company"></div>
+          <div class="company-address-sub" id="p-companyAddress"></div>
+        </div>
+      </div>
+      <div class="header-doc-title">Quotation</div>
+    </div>
+
+    <div class="details-row">
+      <div class="client-block">
+        <div class="client-title" id="p-clientName"></div>
+        <div id="p-clientAddress"></div>
+        <div id="p-clientMobile"></div>
+      </div>
+      <div class="meta-two-lines">
+        <div>Date: <strong id="p-date"></strong></div>
+        <div>Prepared By: <strong id="p-salesPerson"></strong></div>
+      </div>
+    </div>
+
+    <!-- Product Table with Column Borders -->
+    <table class="quote-table">
+      <thead>
+        <tr>
+          <th style="width: 4%; text-align:center;">#</th>
+          <th style="width: 16%; text-align:center;">Product</th>
+          <th style="width: 32%;">Description</th>
+          <th style="width: 14%; text-align:center;">Dimensions (mm)</th>
+          <th style="width: 6%; text-align:center;">Qty</th>
+          <th style="width: 6%; text-align:center;">Unit</th>
+          <th style="width: 11%; text-align:right;">Rate (₹)</th>
+          <th style="width: 11%; text-align:right;">Amount (₹)</th>
+        </tr>
+      </thead>
+      <tbody id="p-table-body"></tbody>
+      <tfoot>
+        <tr>
+          <td colspan="7" class="col-right" style="font-size: 12px; letter-spacing: 0.5px; text-transform: uppercase;">
+            <strong>Total Amount:</strong>
+          </td>
+          <td class="col-right" id="p-grand-total" style="font-size: 15px; font-weight: 700;">
+            ₹ 0
+          </td>
+        </tr>
+      </tfoot>
+    </table>
+
+    <div class="terms-bank-grid">
+      <div>
+        <div class="section-tag">Terms & Conditions</div>
+        <div id="p-terms" style="white-space: pre-line;"></div>
+      </div>
+      <div>
+        <div class="section-tag">Bank Account Details</div>
+        <div id="p-bank" style="white-space: pre-line;"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let itemCount = 0;
+
+    window.addEventListener('DOMContentLoaded', () => {
+      const savedLogo = localStorage.getItem('company_logo');
+      if (savedLogo) displayLogo(savedLogo);
+
+      const draft = localStorage.getItem('quotation_active_draft');
+      if (draft) {
+        populateForm(JSON.parse(draft));
+      } else {
+        document.getElementById('quoteDate').valueAsDate = new Date();
+        addItem();
+      }
+    });
+
+    function savePermanentLogo(event) {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const base64Data = e.target.result;
+          localStorage.setItem('company_logo', base64Data);
+          displayLogo(base64Data);
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    function displayLogo(dataUrl) {
+      const formPreview = document.getElementById('logoPreview');
+      const printLogo = document.getElementById('printLogo');
+      formPreview.src = dataUrl;
+      formPreview.style.display = 'block';
+      printLogo.src = dataUrl;
+      printLogo.style.display = 'block';
+    }
+
+    function addItem(data = null) {
+      itemCount++;
+      const container = document.getElementById('itemsContainer');
+      const itemCard = document.createElement('div');
+      itemCard.className = 'item-card';
+      itemCard.id = `item-${itemCount}`;
+
+      itemCard.innerHTML = `
+        <button type="button" class="btn btn-remove" onclick="removeItem(${itemCount})">Remove</button>
+        <strong>Item #${itemCount}</strong>
+        <div class="item-grid">
+          <div>
+            <label>Item Name</label>
+            <input type="text" class="item-name" value="${data ? data.name : ''}" oninput="autoSaveDraft()" placeholder="e.g. LIVING ROOM SOFA" />
+          </div>
+          <div>
+            <label>Size (L x W x H)</label>
+            <input type="text" class="item-size" value="${data ? data.size : ''}" oninput="autoSaveDraft()" placeholder="e.g. 2270X3395X1425" />
+          </div>
+          <div>
+            <label>Product Photo</label>
+            <input type="file" accept="image/*" class="item-img" onchange="previewImage(event, ${itemCount})" />
+          </div>
+        </div>
+        <div style="margin-top: 10px;">
+          <label>Specifications / Description</label>
+          <textarea rows="2" class="item-desc" oninput="autoSaveDraft()" placeholder="Inner Frame 18 MM Ply, ASH wood, HR Foam...">${data ? data.desc : ''}</textarea>
+        </div>
+        <div class="item-grid" style="margin-top: 10px;">
+          <div>
+            <label>Quantity</label>
+            <input type="number" class="item-qty" value="${data ? data.qty : '1'}" min="1" oninput="autoSaveDraft()" />
+          </div>
+          <div>
+            <label>Unit</label>
+            <select class="item-unit" onchange="autoSaveDraft()">
+              <option value="Nos" ${data && data.unit === 'Nos' ? 'selected' : ''}>Nos</option>
+              <option value="Sets" ${data && data.unit === 'Sets' ? 'selected' : ''}>Sets</option>
+              <option value="RFT" ${data && data.unit === 'RFT' ? 'selected' : ''}>RFT</option>
+              <option value="Sq.Ft" ${data && data.unit === 'Sq.Ft' ? 'selected' : ''}>Sq.Ft</option>
+            </select>
+          </div>
+          <div>
+            <label>Rate (₹)</label>
+            <input type="number" class="item-rate" value="${data ? data.rate : ''}" oninput="autoSaveDraft()" placeholder="0" />
+          </div>
+        </div>
+        <input type="hidden" class="item-img-base64" id="img-data-${itemCount}" value="${data ? (data.img || '') : ''}" />
+      `;
+      container.appendChild(itemCard);
+      autoSaveDraft();
+    }
+
+    function removeItem(id) {
+      const card = document.getElementById(`item-${id}`);
+      if (card) {
+        card.remove();
+        autoSaveDraft();
+      }
+    }
+
+    function previewImage(event, id) {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          document.getElementById(`img-data-${id}`).value = e.target.result;
+          autoSaveDraft();
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    function getFormData() {
+      const items = [];
+      document.querySelectorAll('.item-card').forEach(card => {
+        items.push({
+          name: card.querySelector('.item-name').value,
+          size: card.querySelector('.item-size').value,
+          desc: card.querySelector('.item-desc').value,
+          qty: card.querySelector('.item-qty').value,
+          unit: card.querySelector('.item-unit').value,
+          rate: card.querySelector('.item-rate').value,
+          img: card.querySelector('.item-img-base64').value
+        });
+      });
+
+      return {
+        brandName: document.getElementById('brandName').value,
+        companyName: document.getElementById('companyName').value,
+        companyAddress: document.getElementById('companyAddress').value,
+        salesPerson: document.getElementById('salesPerson').value,
+        quoteDate: document.getElementById('quoteDate').value,
+        clientName: document.getElementById('clientName').value,
+        clientMobile: document.getElementById('clientMobile').value,
+        clientAddress: document.getElementById('clientAddress').value,
+        termsInput: document.getElementById('termsInput').value,
+        bankInput: document.getElementById('bankInput').value,
+        items: items
+      };
+    }
+
+    let saveTimeout = null;
+    function autoSaveDraft() {
+      clearTimeout(saveTimeout);
+      saveTimeout = setTimeout(() => {
+        const data = getFormData();
+        localStorage.setItem('quotation_active_draft', JSON.stringify(data));
+        const status = document.getElementById('saveStatus');
+        status.innerText = "Draft auto-saved";
+        setTimeout(() => { status.innerText = "Auto-saving active..."; }, 1500);
+      }, 300);
+    }
+
+    function populateForm(data) {
+      if (!data) return;
+      document.getElementById('brandName').value = data.brandName || '';
+      document.getElementById('companyName').value = data.companyName || '';
+      document.getElementById('companyAddress').value = data.companyAddress || '';
+      document.getElementById('salesPerson').value = data.salesPerson || '';
+      document.getElementById('quoteDate').value = data.quoteDate || '';
+      document.getElementById('clientName').value = data.clientName || '';
+      document.getElementById('clientMobile').value = data.clientMobile || '';
+      document.getElementById('clientAddress').value = data.clientAddress || '';
+
+      // De-duplicate any cached terms during population
+      if (data.termsInput) {
+        const lines = data.termsInput.split('\n').map(l => l.trim()).filter(Boolean);
+        document.getElementById('termsInput').value = [...new Set(lines)].join('\n');
+      } else {
+        document.getElementById('termsInput').value = '';
+      }
+
+      document.getElementById('bankInput').value = data.bankInput || '';
+
+      const container = document.getElementById('itemsContainer');
+      container.innerHTML = '';
+      itemCount = 0;
+
+      if (data.items && data.items.length > 0) {
+        data.items.forEach(item => addItem(item));
+      } else {
+        addItem();
+      }
+    }
+
+    function saveAsPreset() {
+      const data = getFormData();
+      localStorage.setItem('quotation_saved_preset', JSON.stringify(data));
+      alert("Current details and items saved as standard preset!");
+    }
+
+    function loadPreset() {
+      const saved = localStorage.getItem('quotation_saved_preset');
+      if (!saved) {
+        alert("No preset saved yet.");
+        return;
+      }
+      if (confirm("Replace current details with saved preset?")) {
+        populateForm(JSON.parse(saved));
+      }
+    }
+
+    function clearAllData() {
+      if (confirm("Are you sure you want to clear this quotation?")) {
+        localStorage.removeItem('quotation_active_draft');
+        document.getElementById('clientName').value = '';
+        document.getElementById('clientMobile').value = '';
+        document.getElementById('clientAddress').value = '';
+        document.getElementById('itemsContainer').innerHTML = '';
+        itemCount = 0;
+        addItem();
+      }
+    }
+
+    function formatDate(rawDate) {
+      if (!rawDate) return '';
+      const parts = rawDate.split('-');
+      if (parts.length === 3) {
+        return `${parts[2]}/${parts[1]}/${parts[0]}`;
+      }
+      return rawDate;
+    }
+
+    // Helper to strip accidental duplicate lines
+    function deduplicateLines(text) {
+      const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+      return [...new Set(lines)].join('\n');
+    }
+
+    function generateAndPrint() {
+      document.getElementById('p-brand').innerText = document.getElementById('brandName').value;
+      document.getElementById('p-company').innerText = document.getElementById('companyName').value;
+      document.getElementById('p-companyAddress').innerText = document.getElementById('companyAddress').value;
+      document.getElementById('p-salesPerson').innerText = document.getElementById('salesPerson').value;
+      document.getElementById('p-date').innerText = formatDate(document.getElementById('quoteDate').value);
+
+      document.getElementById('p-clientName').innerText = document.getElementById('clientName').value || '';
+      document.getElementById('p-clientAddress').innerText = document.getElementById('clientAddress').value || '';
+      document.getElementById('p-clientMobile').innerText = document.getElementById('clientMobile').value || '';
+      
+      // Auto-filter duplicates before rendering to sheet
+      const cleanTerms = deduplicateLines(document.getElementById('termsInput').value);
+      document.getElementById('p-terms').innerText = cleanTerms;
+      document.getElementById('termsInput').value = cleanTerms; // sync back to input box
+      autoSaveDraft();
+
+      document.getElementById('p-bank').innerText = document.getElementById('bankInput').value;
+
+      const items = document.querySelectorAll('.item-card');
+      const tableBody = document.getElementById('p-table-body');
+      tableBody.innerHTML = '';
+      let grandTotal = 0;
+
+      items.forEach((item, index) => {
+        const name = item.querySelector('.item-name').value;
+        const desc = item.querySelector('.item-desc').value;
+        const size = item.querySelector('.item-size').value;
+        const qty = parseFloat(item.querySelector('.item-qty').value) || 0;
+        const unit = item.querySelector('.item-unit').value;
+        const rate = parseFloat(item.querySelector('.item-rate').value) || 0;
+        const imgSrc = item.querySelector('.item-img-base64').value;
+
+        const amount = qty * rate;
+        grandTotal += amount;
+
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td class="col-center" style="color:var(--muted);">${index + 1}</td>
+          <td class="col-center">
+            ${imgSrc ? `<img src="${imgSrc}" class="item-img-preview" />` : ''}
+            <strong style="display:block; font-size:12px;">${name}</strong>
+          </td>
+          <td style="white-space: pre-line; line-height: 1.45;">${desc}</td>
+          <td class="col-center">${size}</td>
+          <td class="col-center">${qty}</td>
+          <td class="col-center">${unit}</td>
+          <td class="col-right">₹ ${rate.toLocaleString('en-IN')}</td>
+          <td class="col-right" style="font-weight: 600;">₹ ${amount.toLocaleString('en-IN')}</td>
+        `;
+        tableBody.appendChild(row);
+      });
+
+      document.getElementById('p-grand-total').innerText = '₹ ' + grandTotal.toLocaleString('en-IN');
+      window.print();
+    }
+  </script>
+</body>
+</html>
