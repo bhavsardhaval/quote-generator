@@ -383,19 +383,19 @@
     <div class="form-grid">
       <div>
         <label>Brand Name</label>
-        <input type="text" id="brandName" value="" oninput="autoSaveDraft()" />
+        <input type="text" id="brandName" placeholder="Enter Brand Name" oninput="autoSaveDraft()" />
       </div>
       <div>
         <label>Company / Tagline</label>
-        <input type="text" id="companyName" value="" oninput="autoSaveDraft()" />
+        <input type="text" id="companyName" placeholder="Enter Company / Tagline" oninput="autoSaveDraft()" />
       </div>
       <div>
         <label>Company Address (Under Tagline)</label>
-        <textarea id="companyAddress" rows="2" oninput="autoSaveDraft()">FF-102, Sarthik-2, Nr. Kiran Motors, Opp. Rajpath Club, S.G. Highway, Ahmedabad</textarea>
+        <textarea id="companyAddress" rows="2" placeholder="Enter Company Address" oninput="autoSaveDraft()"></textarea>
       </div>
       <div>
         <label>Prepared By / Representative</label>
-        <input type="text" id="salesPerson" value="Bhagyesh Shah" oninput="autoSaveDraft()" />
+        <input type="text" id="salesPerson" placeholder="Enter Representative Name" oninput="autoSaveDraft()" />
       </div>
       <div>
         <label>Date</label>
@@ -521,7 +521,6 @@ IFSC: HDFC000000</textarea>
       if (draft) {
         populateForm(JSON.parse(draft));
       } else {
-        document.getElementById('quoteDate').valueAsDate = new Date();
         addItem();
       }
     });
@@ -673,7 +672,6 @@ IFSC: HDFC000000</textarea>
       document.getElementById('clientMobile').value = data.clientMobile || '';
       document.getElementById('clientAddress').value = data.clientAddress || '';
 
-      // De-duplicate any cached terms during population
       if (data.termsInput) {
         const lines = data.termsInput.split('\n').map(l => l.trim()).filter(Boolean);
         document.getElementById('termsInput').value = [...new Set(lines)].join('\n');
@@ -714,6 +712,11 @@ IFSC: HDFC000000</textarea>
     function clearAllData() {
       if (confirm("Are you sure you want to clear this quotation?")) {
         localStorage.removeItem('quotation_active_draft');
+        document.getElementById('brandName').value = '';
+        document.getElementById('companyName').value = '';
+        document.getElementById('companyAddress').value = '';
+        document.getElementById('salesPerson').value = '';
+        document.getElementById('quoteDate').value = '';
         document.getElementById('clientName').value = '';
         document.getElementById('clientMobile').value = '';
         document.getElementById('clientAddress').value = '';
@@ -732,7 +735,6 @@ IFSC: HDFC000000</textarea>
       return rawDate;
     }
 
-    // Helper to strip accidental duplicate lines
     function deduplicateLines(text) {
       const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
       return [...new Set(lines)].join('\n');
@@ -749,10 +751,9 @@ IFSC: HDFC000000</textarea>
       document.getElementById('p-clientAddress').innerText = document.getElementById('clientAddress').value || '';
       document.getElementById('p-clientMobile').innerText = document.getElementById('clientMobile').value || '';
       
-      // Auto-filter duplicates before rendering to sheet
       const cleanTerms = deduplicateLines(document.getElementById('termsInput').value);
       document.getElementById('p-terms').innerText = cleanTerms;
-      document.getElementById('termsInput').value = cleanTerms; // sync back to input box
+      document.getElementById('termsInput').value = cleanTerms;
       autoSaveDraft();
 
       document.getElementById('p-bank').innerText = document.getElementById('bankInput').value;
